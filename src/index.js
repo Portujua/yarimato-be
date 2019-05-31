@@ -1,6 +1,7 @@
 let express = require('express')
 let path = require('path')
 let bodyParser = require('body-parser')
+let mung = require('express-mung')
 
 let app = express()
 
@@ -8,8 +9,13 @@ app.use(bodyParser.json())
 
 let databaseConfig = require('./database/config')
 
+app.use(mung.json((body, req, res) => {
+  return { data: body, status: res.statusCode }
+}))
+
 app.use((req, res, next) => {
   console.log(`[${new Date().toString()}] Called '${req.originalUrl}' with body: ${JSON.stringify(req.body)}`)
+
   next()
 })
 
