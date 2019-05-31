@@ -12,4 +12,16 @@ router.post('/products/:productId/inventory', (req, res) => {
   })
 })
 
+// List available inventory for product
+router.get('/products/:productId/inventory', (req, res) => {
+  let minValue = 0
+  if (req.params.min) {
+    minValue = req.params.min
+  }
+
+  ProductInventoryModel.find({ amount: { $gt: minValue } }).then((data) => {
+    res.send(data);
+  })
+})
+
 module.exports = router

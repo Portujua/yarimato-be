@@ -5,7 +5,7 @@ let SaleSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'product'
   },
-  price: {
+  unitPrice: {
     type: Number,
     required: true
   },

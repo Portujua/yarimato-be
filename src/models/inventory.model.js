@@ -12,6 +12,11 @@ let ProductInventorySchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  modifiedAt: {
+    type: Date,
+    required: false,
+    default: null
   }
 })
 

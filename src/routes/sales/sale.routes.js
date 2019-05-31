@@ -6,23 +6,40 @@ let router = express.Router()
 // Create sale
 router.post('/sales', (req, res) => {
   // Check for availability
-  // let check = new InventoryModel({ product: '5cf04d0491afd7772863d4e1' })
-  // check.countByProduct().then((response) => {
-  //   res.send(response)
-  // })
-  // InventoryModel.countDocuments({ product: '5cf04d0491afd7772863d4e1' }, (data) => {
-  //   console.log(data)
-  //   res.send(data)
-  // })
+  InventoryModel.find({ product: req.body.product, amount: { $gt: 0 } }).then((availableInventory) => {
+    let totalAvailable = availableInventory.reduce((s, f) => s + f.amount, 0);
 
-  console.log(db)
+    if (totalAvailable < req.body.amount) {
+      return res.status(400).json({
+        message: 'No hay suficiente inventario'
+      })
+    }
 
-  InventoryModel.find({ product: '5cf04d0491afd7772863d4e1' }).populate({ path: 'product', model: 'Product' }).then((data) => {
-    res.send(data)
+    // Remove from inventory
+    while (req.body.amount > 0) {
+      for (const inventory of availableInventory) {
+        if (req.body.amount < 0) {
+          break
+        }
+
+        let newAmount = 0
+
+        if (inventory.amount >= req.body.amount) {
+          newAmount = inventory.amount - req.body.amount
+          req.body.amount = 0
+        } else {
+          newAmount = req.body.amount - inventory.amount
+          req.body.amount -= inventory.amount
+        }
+
+        InventoryModel.findByIdAndUpdate(inventory._id, { amount: newAmount }, { new: true }).then((data) => {
+          console.info(`Inventory ${data._id} was updated to new amount: ${data.amount}`)
+        })
+      }
+    }
+
+    res.send('Sale created successfully')
   })
-  // InventoryModel.countByProduct('5cf04d0491afd7772863d4e1').then((data) => {
-  //   res.send(data)
-  // })
 })
 
 module.exports = router
