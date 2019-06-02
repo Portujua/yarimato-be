@@ -33,6 +33,8 @@ router.get('/products/:id/price-historic', (req, res) => {
     .populate({ path: 'product', model: ProductModel })
     .then((data) => {
       res.send(data)
+    }).catch(err => {
+      res.status(400).json(err)
     })
 })
 
@@ -42,6 +44,8 @@ router.get('/products/:id', (req, res) => {
     _id: req.params.id
   }).then((data) => {
     res.send(data)
+  }).catch(err => {
+    res.status(400).json(err)
   })
 })
 
@@ -72,7 +76,11 @@ router.put('/products/:id', (req, res) => {
 
       model.save().then((data) => {
         // Nothing here
+      }).catch(err => {
+        res.status(400).json(err)
       })
+    }).catch(err => {
+      res.status(400).json(err)
     })
   }
 

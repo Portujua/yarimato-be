@@ -9,18 +9,19 @@ router.post('/products/:productId/inventory', (req, res) => {
 
   model.save().then((data) => {
     res.send(data)
+  }).catch(err => {
+    res.status(400).json(err)
   })
 })
 
 // List available inventory for product
 router.get('/products/:productId/inventory', (req, res) => {
-  let minValue = 0
-  if (req.params.min) {
-    minValue = req.params.min
-  }
+  let minValue = req.params.min || 0
 
   ProductInventoryModel.find({ amount: { $gt: minValue } }).then((data) => {
     res.send(data);
+  }).catch(err => {
+    res.status(400).json(err)
   })
 })
 

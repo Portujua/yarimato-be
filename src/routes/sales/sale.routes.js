@@ -10,9 +10,7 @@ router.post('/sales', (req, res) => {
     let totalAvailable = availableInventory.reduce((s, f) => s + f.amount, 0);
 
     if (totalAvailable < req.body.amount) {
-      return res.status(400).json({
-        message: 'No hay suficiente inventario'
-      })
+      return res.status(400).json('No hay suficiente inventario')
     }
 
     // Remove from inventory
@@ -39,6 +37,8 @@ router.post('/sales', (req, res) => {
     }
 
     res.send('Sale created successfully')
+  }).catch(err => {
+    res.status(400).json(err)
   })
 })
 
