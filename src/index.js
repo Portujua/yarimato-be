@@ -25,6 +25,7 @@ app.use((req, res, next) => {
 app.use(require('./routes/products/products.routes'))
 app.use(require('./routes/products/productInventory.routes'))
 app.use(require('./routes/sales/sale.routes'))
+app.use(require('./routes/users/users.routes'))
 
 
 app.use(express.static('public'))

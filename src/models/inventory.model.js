@@ -11,24 +11,22 @@ let ProductInventorySchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
+    required: true,
     default: Date.now
   },
   modifiedAt: {
     type: Date,
     required: false,
     default: null
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'owner',
+    default: null
+  },
+  initialAmount: {
+    type: Number
   }
 })
-
-ProductInventorySchema.methods.countByProduct = function (cb) {
-  return this.model('ProductInventory')
-    .find({ product: this.product })
-    .aggregate({
-      $group: {
-        _id: '$region',
-        count: { $sum: 1 }
-      }
-    })
-}
 
 module.exports = mongoose.model('ProductInventory', ProductInventorySchema)
