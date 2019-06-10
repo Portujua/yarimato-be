@@ -16,6 +16,10 @@ let SaleSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  inventoriesUsed: {
+    type: Array,
+    required: true
   }
 })
 

@@ -26,6 +26,10 @@ let ProductInventorySchema = new mongoose.Schema({
   },
   initialAmount: {
     type: Number
+  },
+  price: {
+    type: Number,
+    required: true
   }
 })
 

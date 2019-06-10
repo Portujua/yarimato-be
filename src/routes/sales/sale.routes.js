@@ -1,6 +1,7 @@
 let InventoryModel = require('../../models/inventory.model')
 let ProductModel = require('../../models/product.model')
 let SaleModel = require('../../models/sale.model')
+let OwnerModel = require('../../models/owner.model')
 let express = require('express')
 let router = express.Router()
 
@@ -17,13 +18,13 @@ router.post('/sales', (req, res) => {
     let priceNow = null;
     let amount = req.body.amount;
 
+    let inventoriesUsed = []
     let promises = []
 
     // Remove from inventory
     while (req.body.amount > 0) {
       for (const inventory of availableInventory) {
         if (priceNow == null) {
-          console.log(inventory)
           priceNow = inventory.product.price;
         }
 
@@ -32,27 +33,31 @@ router.post('/sales', (req, res) => {
         }
 
         let newAmount = 0
+        let amountUsed = 0
 
         if (inventory.amount >= req.body.amount) {
+          amountUsed = req.body.amount
           newAmount = inventory.amount - req.body.amount
           req.body.amount = 0
         } else {
-          newAmount = req.body.amount - inventory.amount
+          amountUsed = inventory.amount
+          newAmount = 0
           req.body.amount -= inventory.amount
         }
 
-        promises.push(InventoryModel.findByIdAndUpdate(inventory._id, { amount: newAmount }, { new: true }))
+        promises.push(InventoryModel.findByIdAndUpdate(inventory._id, { amount: newAmount }, { new: true }).then((data) => {
+          inventoriesUsed.push({ amount: amountUsed, inventory: data })
+        }))
       }
 
       // Before breaking from while
       if (req.body.amount <= 0) {
         Promise.all(promises).then(() => {
-          console.log('huhhhhh')
 
           // Create sale
           req.body['unitPrice'] = priceNow;
           req.body['amount'] = amount;
-          console.log(req.body)
+          req.body['inventoriesUsed'] = inventoriesUsed
           let sale = new SaleModel(req.body);
 
           sale.save().then((data) => {
@@ -75,6 +80,21 @@ router.get('/sales', (req, res) => {
     .populate({ path: 'product', model: ProductModel })
     .then((data) => {
       res.send(data)
+    })
+})
+
+// Get sale by ID
+router.get('/sales/:id', (req, res) => {
+  SaleModel.findOne({
+    _id: req.params.id
+  })
+    .populate({ path: 'product', model: ProductModel })
+    .populate({ path: 'inventoriesUsed.inventory.product', model: ProductModel })
+    .populate({ path: 'inventoriesUsed.inventory.owner', model: OwnerModel })
+    .then((data) => {
+      res.send(data)
+    }).catch(err => {
+      res.status(400).json(err)
     })
 })
 
